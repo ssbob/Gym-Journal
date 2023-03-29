@@ -176,42 +176,63 @@ struct ExerciseDetailWrapper: View {
     }
 }
 
-// Journal View
 struct JournalView: View {
     @EnvironmentObject var workoutData: WorkoutData
-    let dateFormatter: DateFormatter = {
+    
+    private let dateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.dateStyle = .medium
         return df
     }()
     
     var body: some View {
-        NavigationView {
-            List(workoutData.workouts) { workout in
-                VStack(alignment: .leading) {
-                    Text(dateFormatter.string(from: workout.date))
-                        .font(.headline)
-                    
-                    ForEach(workout.sets) { workoutSet in
+        ScrollView {
+            VStack(spacing: 20) {
+                ForEach(workoutData.workouts) { workout in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(dateFormatter.string(from: workout.date))
+                            .font(.headline)
+                        
+                        ForEach(workout.sets) { workoutSet in
+                            HStack {
+                                Text("\(workoutSet.exercise):")
+                                    .fontWeight(.bold)
+                                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                                
+                                Text("\(workoutSet.reps) reps @ \(workoutSet.weight) lbs")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        
+                        Divider()
+                        
                         HStack {
-                            Text("\(workoutSet.exercise):")
+                            Text("Total Weight Moved:")
                                 .fontWeight(.bold)
-                            Text("\(workoutSet.reps) reps @ \(workoutSet.weight) lbs")
-                                .font(.footnote)
+                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                            
+                            Text("\(totalWeightMoved(workout: workout)) lbs")
+                                .font(.subheadline)
+                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .trailing)
                         }
                     }
-                    .padding(.bottom, 4)
-                    
-                    Divider()
-                    
-                    Text("Total Weight Moved: \(totalWeightMoved(workout: workout))")
-                        .font(.subheadline)
-                        .fontWeight(.bold)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .shadow(radius: 4, x: 0, y: 2)
                 }
-                .padding(.bottom, 8)
             }
-            .navigationBarTitle("Journal")
+            .padding(.top, 20)
+            .padding(.bottom, 80)
+            .padding(.horizontal, 16)
+            .font(Font.system(size: min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) * 0.045, weight: .regular))
+            .foregroundColor(.primary)
         }
+        .background(Color(UIColor.systemGray6))
+        .navigationBarTitle("Journal")
     }
     
     private func totalWeightMoved(workout: WeightLiftingWorkout) -> Int {
